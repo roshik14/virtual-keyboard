@@ -3,7 +3,7 @@ import './main.scss';
 import TextArea from '../components/textarea/textarea.js';
 import Button from '../components/button/button.js';
 import Wrapper from '../components/wrapper/wrapper.js';
-import data from '../../buttons.json';
+import data from './buttons.json';
 
 const getButtons = () => {
   const div = document.createElement('div');

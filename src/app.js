@@ -3,11 +3,11 @@ import Header from './header/header.js';
 import Main from './main/main.js';
 import Footer from './footer/footer.js';
 
-const body = document.querySelector('body');
-const header = Header('Virtual keyboard');
-const main = Main();
-const footer = Footer();
+const init = () => {
+  const body = document.querySelector('body');
+  body.append(Header('Virtual keyboard'));
+  body.append(Main());
+  body.append(Footer());
+};
 
-body.append(header);
-body.append(main);
-body.append(footer);
+init();

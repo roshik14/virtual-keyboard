@@ -1,6 +1,6 @@
 import './header.scss';
 // eslint-disable-next-line import/extensions
-import Wrapper from '../wrapper/wrapper.js';
+import Wrapper from '../components/wrapper/wrapper.js';
 
 const Title = (title) => {
   const titleElement = document.createElement('h1');

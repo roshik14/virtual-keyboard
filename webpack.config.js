@@ -1,5 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
+
 const path = require('path');
 
 module.exports = {
@@ -37,6 +39,7 @@ module.exports = {
       template: './src/index.html',
       filename: 'index.html',
     }),
+    new ESLintPlugin(),
   ],
   devServer: {
     static: {

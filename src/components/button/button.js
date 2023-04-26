@@ -1,5 +1,3 @@
-import './button.scss';
-
 const Button = ({ content, classList }) => {
   const button = document.createElement('button');
   button.classList.add(...classList);

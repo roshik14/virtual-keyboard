@@ -1,0 +1,39 @@
+.keyboard {
+  margin-top: 25px;
+}
+
+.keyboard-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard-row {
+  display: flex;
+  margin: 0 auto 5px;
+  column-gap: 5px;
+  justify-content: start;
+}
+
+.keyboard-button {
+  padding: 15px 25px;
+  font-size: 18px;
+  color: #26243d;
+  background-color: #fffaf2;
+  border: 1px solid #e2e2e2;
+  transition: 0.2s linear;
+}
+
+// .keys-button:hover {
+//   background-color: #f1f0f1;
+// }
+
+.keyboard-button__functional {
+  padding: 15px 25px 15px 10px;
+  background-color: #e2e2e2;
+}
+
+.keyboard-button:active,
+.keyboard-button__active {
+  background-color: #76777c;
+  color: #fff;
+}

@@ -11,7 +11,7 @@ const FunctionalKeys = {
   SHIFT_LEFT: 'ShiftLeft',
   SHIFT_RIGHT: 'ShiftRight',
   CONTROL_LEFT: 'ControlLeft',
-  CONTROL_RIGHT: 'ControlRIght',
+  CONTROL_RIGHT: 'ControlRight',
   WIN: 'MetaLeft',
   ALT_LEFT: 'AltLeft',
   ALT_RIGHT: 'AltRight',
@@ -43,13 +43,14 @@ const Css = {
 
 const MouseEvents = new Set(['mousedown', 'mouseup', 'click', 'dblclick']);
 const KeyboardEvents = new Set(['keydown', 'keyup', 'keypress']);
+const FunctionalKeyCodes = new Set(Object.values(FunctionalKeys));
 
 const isLetter = (character) => (character >= 'a' && character <= 'z') || (character >= 'а' && character <= 'я');
 
 const createButton = (current, code, isWritable) => {
   const content = isWritable && isLetter(current.key) ? current.shiftKey : current.key;
   const classList = [Css.BUTTON];
-  if (FunctionalKeys[code]) {
+  if (FunctionalKeyCodes.has(code)) {
     classList.push(Css.BUTTON_FUNCTIONAL);
   }
   return Button({ content, classList });
@@ -57,8 +58,8 @@ const createButton = (current, code, isWritable) => {
 
 const createButtons = (language) => {
   const container = Element(Html.DIV, [Css.KEYBOARD]);
-  keys.forEach((btnKeys) => {
-    const wrapper = Element(Html.DIV, [Css.WRAPPER]);
+  keys.forEach((btnKeys, i) => {
+    const wrapper = Element(Html.DIV, [`${Css.ROW}-${i}`]);
     btnKeys.forEach((key) => {
       const current = language === 'en'
         ? { key: key.enKey, shiftKey: key.enShiftKey }
@@ -110,7 +111,7 @@ class Keyboard {
   create() {
     this.#rows = createButtons(this.language);
     this.listenMouseAndKeyboard();
-    const container = Element(Html.SECTION, [Css.KEYBOARD_WRAPPER]);
+    const container = Element(Html.SECTION, [Css.WRAPPER]);
     container.append(this.#rows);
     return container;
   }

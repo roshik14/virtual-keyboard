@@ -423,20 +423,20 @@ const keys = [
       isWritable: true,
     },
     {
-      enKey: '/',
-      enShiftKey: '?',
-      ruKey: '.',
-      ruShiftKey: ',',
-      code: 'Slash',
-      isWritable: true,
-    },
-    {
       enKey: '↑',
       enShiftKey: '↑',
       ruKey: '↑',
       ruShiftKey: '↑',
       code: 'ArrowUp',
       isWritable: false,
+    },
+    {
+      enKey: '/',
+      enShiftKey: '?',
+      ruKey: '.',
+      ruShiftKey: ',',
+      code: 'Slash',
+      isWritable: true,
     },
     {
       enKey: 'Shift',

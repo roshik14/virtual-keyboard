@@ -1,5 +1,12 @@
+@mixin keyboard-row {
+  display: grid;
+  column-gap: 5px;
+  margin-top: 5px;
+  justify-content: center;
+}
+
 .keyboard {
-  margin-top: 25px;
+  margin: 25px;
 }
 
 .keyboard-wrapper {
@@ -7,12 +14,31 @@
   justify-content: center;
 }
 
-.keyboard-row {
-  display: flex;
-  margin: 0 auto 5px;
-  column-gap: 5px;
-  justify-content: start;
+.keyboard-row-0 {
+  @include keyboard-row;
+  grid-template-columns: repeat(14, 1fr);
 }
+
+.keyboard-row-1 {
+  @include keyboard-row;
+  grid-template-columns: repeat(15, 1fr);
+}
+
+.keyboard-row-2 {
+  @include keyboard-row;
+  grid-template-columns: repeat(12, 1fr) 15%;
+}
+
+.keyboard-row-3 {
+  @include keyboard-row;
+  grid-template-columns: 10% repeat(9, 1fr) 6% 1fr 16%;
+}
+
+.keyboard-row-4 {
+  @include keyboard-row;
+  grid-template-columns: repeat(3, 1fr) 39% repeat(3, 6%) repeat(2, 1fr);
+}
+
 
 .keyboard-button {
   padding: 15px 25px;

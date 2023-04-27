@@ -126,7 +126,9 @@ class Keyboard {
 
   /**
    * Add listener on component (only mouse and keyboard events)
-   * @returns {void}
+   * @param {String} type type of event
+   * @param {Function} listener callback function
+   * @param {{}} options options for listener
    * @throws {Error} Type of event is not mouse event or keyboard event
    */
   addEventListener(type, listener, options) {

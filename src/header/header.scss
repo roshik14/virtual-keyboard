@@ -1,4 +1,13 @@
+@import '../css_modules/mixins.scss';
+@import '../css_modules/vars.scss';
+
+.header {
+  font-size: 20px;
+  padding: 10px 0;
+  @include background;
+}
+
 .header-title {
   text-align: center;
-  color: #76777c;
+  color: $title-color;
 }

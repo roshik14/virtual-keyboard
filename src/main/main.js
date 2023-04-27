@@ -2,6 +2,7 @@ import Element from '../components/element/element';
 import TextArea from '../components/textarea/textarea';
 import Wrapper from '../components/wrapper/wrapper';
 import Keyboard from '../components/keyboard/keyboard';
+import StateManager from '../state-manager/state-manager';
 import './main.scss';
 
 const Html = {
@@ -13,10 +14,13 @@ const Css = {
   MAIN_BG: 'main-bg',
 };
 
+const namespace = window.VirtualKeyboard;
+
 const getContent = () => {
   const wrapper = Wrapper();
   const textarea = TextArea();
   const keyboard = new Keyboard();
+  namespace.stateManager = new StateManager(keyboard, textarea);
   wrapper.append(textarea);
   wrapper.append(keyboard.getElement());
   return wrapper;

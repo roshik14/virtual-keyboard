@@ -1,3 +1,5 @@
+@import '../../css_modules/vars.scss';
+
 @mixin keyboard-row {
   display: grid;
   column-gap: 5px;
@@ -7,6 +9,8 @@
 
 .keyboard {
   margin: 25px;
+  padding: 10px;
+  background-color: $keyboard-bg-color;
 }
 
 .keyboard-wrapper {
@@ -43,19 +47,18 @@
 .keyboard-button {
   padding: 15px 25px;
   font-size: 18px;
-  color: #26243d;
-  background-color: #fffaf2;
-  border: 1px solid #e2e2e2;
+  color: $key-color;
+  background-color: $key-bg-color;
+  border: 1px solid $key-border-color;
   transition: 0.2s linear;
 }
 
 .keyboard-button__functional {
-  padding: 15px 25px 15px 10px;
-  background-color: #e2e2e2;
+  background-color: $key-border-color;
 }
 
 .keyboard-button:active,
 .keyboard-button__active {
-  background-color: #76777c;
-  color: #fff;
+  background-color: $key-active-color;
+  color: $white-color;
 }

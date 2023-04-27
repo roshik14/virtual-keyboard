@@ -1,92 +1,39 @@
-import Element from '../element/element';
-import Button from '../button/button';
+import KeyboardUtils from './keyboard-utils';
 import keys from '../../keys/keys-data';
-import './keyboard.scss';
 
-const FunctionalKeys = {
-  BACKSPACE: 'Backspace',
-  TAB: 'Tab',
-  DELETE: 'Delete',
-  CAPSLOCK: 'CapsLock',
-  SHIFT_LEFT: 'ShiftLeft',
-  SHIFT_RIGHT: 'ShiftRight',
-  CONTROL_LEFT: 'ControlLeft',
-  CONTROL_RIGHT: 'ControlRight',
-  WIN: 'MetaLeft',
-  ALT_LEFT: 'AltLeft',
-  ALT_RIGHT: 'AltRight',
-  ENTER: 'Enter',
-};
-
-const ModifierStates = {
-  CAPSLOCK: FunctionalKeys.CAPSLOCK,
-  SHIFT: 'Shift',
-  CTRL: 'Control',
-  WIN: 'OS',
-  ALT: 'Alt',
-};
-
-const Html = {
-  DIV: 'div',
-  SECTION: 'section',
-  BUTTON: 'button',
-};
-
-const Css = {
-  KEYBOARD: 'keyboard',
-  WRAPPER: 'keyboard-wrapper',
-  ROW: 'keyboard-row',
-  BUTTON: 'keyboard-button',
-  BUTTON_FUNCTIONAL: 'keyboard-button__functional',
-  BUTTON_ACTIVE: 'keyboard-button__active',
+const StorageProperties = {
+  LANGUAGE: 'lang',
 };
 
 const MouseEvents = new Set(['mousedown', 'mouseup', 'click', 'dblclick']);
 const KeyboardEvents = new Set(['keydown', 'keyup', 'keypress']);
-const FunctionalKeyCodes = new Set(Object.values(FunctionalKeys));
-
-const isLetter = (character) => (character >= 'a' && character <= 'z') || (character >= 'а' && character <= 'я');
-
-const createButton = (current, code, isWritable) => {
-  const content = isWritable && isLetter(current.key) ? current.shiftKey : current.key;
-  const classList = [Css.BUTTON];
-  if (FunctionalKeyCodes.has(code)) {
-    classList.push(Css.BUTTON_FUNCTIONAL);
-  }
-  return Button({ content, classList });
-};
-
-const createButtons = (language) => {
-  const container = Element(Html.DIV, [Css.KEYBOARD]);
-  keys.forEach((btnKeys, i) => {
-    const wrapper = Element(Html.DIV, [`${Css.ROW}-${i}`]);
-    btnKeys.forEach((key) => {
-      const current = language === 'en'
-        ? { key: key.enKey, shiftKey: key.enShiftKey }
-        : { key: key.ruKey, shiftKey: key.ruShiftKey };
-      const button = createButton(current, key.code, key.isWritable);
-      wrapper.append(button);
-    });
-    container.append(wrapper);
-  });
-  return container;
-};
 
 /** Class representing keyboard component. */
 class Keyboard {
   #rows;
 
-  #keysData;
+  #keyObjects;
 
   #buttons;
 
-  constructor() {
-    this.#rows = null;
-    this.#keysData = null;
-    this.#buttons = null;
+  #element;
 
-    this.language = localStorage.getItem('lang') || 'en';
-    this.state = {
+  #state;
+
+  #language;
+
+  /**
+   * Creates a Keyboard component
+   */
+  constructor() {
+    this.#element = KeyboardUtils.createKeyboardElement(this.#language);
+    this.#rows = this.#element.firstChild;
+    this.#buttons = KeyboardUtils.getButtonElements(this.#rows);
+    this.#keyObjects = new Map(keys.flat().map((x, i) => [x.code, { index: i, data: x }]));
+
+    this.#language = localStorage.getItem(StorageProperties.LANGUAGE)
+      || KeyboardUtils.Languages.ENG;
+    this.#state = {
       shift: false,
       capsLock: false,
       capsLockClick: false,
@@ -94,26 +41,87 @@ class Keyboard {
       win: false,
       alt: false,
     };
-  }
 
-  get keys() {
-    return this.#keysData;
-  }
-
-  get buttons() {
-    return this.#buttons;
+    KeyboardUtils.listenMouse(this);
+    KeyboardUtils.listenKeyboard(this);
   }
 
   /**
-   * Create component for displaying in DOM
-   * @returns {HtmlElement} section
+   * @returns {HTMLELement} HTMLElement of Keyboard component for displaying in DOM
    */
-  create() {
-    this.#rows = createButtons(this.language);
-    this.listenMouseAndKeyboard();
-    const container = Element(Html.SECTION, [Css.WRAPPER]);
-    container.append(this.#rows);
-    return container;
+  getElement() {
+    return this.#element;
+  }
+
+  /**
+   * Return state key's value
+   * @param {String} key
+   * @returns {Boolean | undefined} Value
+   */
+  getStateValue(key) {
+    return this.#state[key];
+  }
+
+  /**
+   * Return object that represents key data
+   * @param {string} code event.code of pressed key
+   * @returns {{index, keyData: {enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}}}
+   */
+  getKey(code) {
+    return this.#keyObjects.get(code);
+  }
+
+  /**
+   * Return array of objects that represents key data
+   * @returns {[{ enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable }]}
+   */
+  getKeysEntries() {
+    return Object.values(Object.fromEntries(this.#keyObjects));
+  }
+
+  /**
+   * Return Button element of keyboard
+   * @param {Number} index Index of pressed button
+   * @returns {HTMLButtonElement}
+   */
+  getButton(index) {
+    return this.#buttons[index];
+  }
+
+  /**
+   * Returns keyboard's current language
+   * @returns {String}
+   */
+  getLanguage() {
+    return this.#language;
+  }
+
+  /**
+   * Updates button's display text
+   * @param {Number} index
+   * @param {{enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}} value
+   */
+  updateButton(index, value) {
+    this.#buttons[index].textContent = value;
+  }
+
+  /**
+   * Set parameter for state object
+   * @param {String} key Key of state object
+   * @param {Boolean} value Value
+   */
+  setStateValue(key, value) {
+    this.#state[key] = value;
+  }
+
+  /**
+   * Switch keyboard language from ENG to RU or from RU to ENG
+   */
+  updateLanguage() {
+    this.#language = this.#language === KeyboardUtils.Languages.ENG
+      ? KeyboardUtils.Languages.RU
+      : KeyboardUtils.Languages.ENG;
+    localStorage.setItem(StorageProperties.LANGUAGE, this.#language);
   }
 
   /**
@@ -131,53 +139,6 @@ class Keyboard {
       return;
     }
     throw Error('Unknown type of event');
-  }
-
-  listenMouseAndKeyboard() {
-    this.listenMouse();
-    this.listenKeyboard();
-  }
-
-  listenMouse() {
-    this.addEventListener('click', (event) => {
-      const { target } = event;
-      if (target.closest(Html.BUTTON) && target.textContent === FunctionalKeys.CAPSLOCK) {
-        this.state.capsLockClick = !this.state.capsLockClick;
-        target.classList.toggle(Css.BUTTON_ACTIVE);
-      }
-    });
-  }
-
-  listenKeyboard() {
-    this.fillButtons();
-    const keysDict = new Map(keys.flat().map((x, i) => [x.code, { index: i, data: x }]));
-    document.body.addEventListener('keydown', (event) => {
-      if (keysDict.has(event.code)) {
-        this.buttons[keysDict.get(event.code).index].classList.add(Css.BUTTON_ACTIVE);
-      }
-    });
-    document.body.addEventListener('keyup', (event) => {
-      if (keysDict.has(event.code)) {
-        this.buttons[keysDict.get(event.code).index].classList.remove(Css.BUTTON_ACTIVE);
-      }
-    });
-    document.body.addEventListener('keydown', (event) => {
-      this.state.alt = event.getModifierState(ModifierStates.ALT);
-      this.state.capsLock = event.getModifierState(ModifierStates.CAPSLOCK);
-      this.state.control = event.getModifierState(ModifierStates.CTRL);
-      this.state.shift = event.getModifierState(ModifierStates.SHIFT);
-      this.state.win = event.getModifierState(ModifierStates.WIN);
-    });
-  }
-
-  fillButtons() {
-    if (this.#buttons) {
-      return;
-    }
-    this.#buttons = [];
-    Array.from(this.#rows.children)
-      .forEach((row) => Array.from(row.children)
-        .forEach((btn) => this.#buttons.push(btn)));
   }
 }
 

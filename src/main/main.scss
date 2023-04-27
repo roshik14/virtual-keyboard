@@ -1,0 +1,10 @@
+@import '../css_modules/mixins.scss';
+@import '../css_modules/normalize.scss';
+
+.main {
+  padding: 50px 0 50px;
+}
+
+.main-bg {
+  @include background;
+}

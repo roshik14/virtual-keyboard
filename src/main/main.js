@@ -1,17 +1,19 @@
+import Element from '../components/element/element';
 import TextArea from '../components/textarea/textarea';
 import Wrapper from '../components/wrapper/wrapper';
 import Keyboard from '../components/keyboard/keyboard';
 
 const getContent = () => {
   const wrapper = Wrapper();
-  const textArea = TextArea();
-  wrapper.append(textArea);
-  wrapper.append(Keyboard());
+  const textarea = TextArea();
+  const keyboard = new Keyboard();
+  wrapper.append(textarea);
+  wrapper.append(keyboard.create());
   return wrapper;
 };
 
 const Main = () => {
-  const main = document.createElement('main');
+  const main = Element('main');
   main.append(getContent());
   return main;
 };

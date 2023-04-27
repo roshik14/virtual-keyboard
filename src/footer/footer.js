@@ -1,9 +1,9 @@
-/* eslint-disable import/extensions */
+import Element from '../components/element/element';
+import Wrapper from '../components/wrapper/wrapper';
 import './footer.scss';
-import Wrapper from '../components/wrapper/wrapper.js';
 
 const Footer = () => {
-  const footer = document.createElement('footer');
+  const footer = Element('footer');
   footer.append(Wrapper());
   return footer;
 };

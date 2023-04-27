@@ -2,10 +2,20 @@ import Element from '../components/element/element';
 import Wrapper from '../components/wrapper/wrapper';
 import './header.scss';
 
+const Html = {
+  HEADER: 'header',
+  TITLE: 'h1',
+};
+
+const Css = {
+  HEADER: 'header',
+  TITLE: 'header-title',
+};
+
 const Header = (title) => {
   const wrapper = Wrapper();
-  wrapper.append(Element('h1', ['header-title'], title));
-  const header = Element('header');
+  wrapper.append(Element(Html.TITLE, [Css.TITLE], title));
+  const header = Element(Html.HEADER, [Css.HEADER]);
   header.append(wrapper);
   return header;
 };

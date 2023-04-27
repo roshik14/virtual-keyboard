@@ -1,10 +1,24 @@
+import Element from '../element/element';
 import './textarea.scss';
 
+const Css = {
+  TEXTAREA: 'textarea',
+};
+
+const Options = {
+  rows: 10,
+  autofocus: true,
+};
+
+const disableDefaultKeypress = (textarea) => {
+  textarea.addEventListener('keypress', (event) => {
+    event.preventDefault();
+  });
+};
+
 const TextArea = () => {
-  const textarea = document.createElement('textarea');
-  textarea.rows = 10;
-  textarea.classList.add('textarea');
-  textarea.autofocus = true;
+  const textarea = Element('textarea', [Css.TEXTAREA], '', Options);
+  disableDefaultKeypress(textarea);
   return textarea;
 };
 

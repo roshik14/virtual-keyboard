@@ -1,9 +1,6 @@
+import Element from '../element/element';
 import './wrapper.scss';
 
-const Wrapper = () => {
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('wrapper');
-  return wrapper;
-};
+const Wrapper = () => Element('div', ['wrapper']);
 
 export default Wrapper;

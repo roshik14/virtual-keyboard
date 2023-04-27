@@ -1,7 +1,7 @@
+import Element from '../element/element';
+
 const Button = ({ content, classList }) => {
-  const button = document.createElement('button');
-  button.classList.add(...classList);
-  button.innerHTML = content;
+  const button = Element('button', classList, content);
   return button;
 };
 

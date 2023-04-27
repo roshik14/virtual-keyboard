@@ -1,4 +1,4 @@
-const enKeys = [
+const keys = [
   [
     {
       enKey: '`',
@@ -523,4 +523,4 @@ const enKeys = [
   ],
 ];
 
-export default enKeys;
+export default keys;

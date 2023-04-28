@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import Element from '../element/element';
 import Button from '../button/button';
 import keys from '../../keys/keys-data';
@@ -52,11 +51,11 @@ const FunctionalKeyCodes = new Set(Object.values(FunctionalKeys));
 
 const isLetter = (str) => (str >= 'a' && str <= 'z') || (str >= 'а' && str <= 'я');
 
-const getDisplayKey = (key, language) => {
+const getDisplayKey = (key, language, isShiftPressed) => {
   const current = language === Languages.ENG
     ? { key: key.enKey, shiftKey: key.enShiftKey }
     : { key: key.ruKey, shiftKey: key.ruShiftKey };
-  return isLetter(current.key) ? current.shiftKey : current.key;
+  return isLetter(current.key) || isShiftPressed ? current.shiftKey : current.key;
 };
 
 const createButton = (content, code) => {
@@ -92,20 +91,24 @@ const createKeyboardElement = (language) => {
   return container;
 };
 
-const updateKeyboard = (obj) => {
-  obj.updateLanguage();
+const updateKeyboard = (obj, isShiftPressed) => {
   obj.getKeysEntries().forEach((value) => {
-    obj.updateButton(value.index, getDisplayKey(value.data, obj.getLanguage()));
+    const language = obj.getLanguage();
+    obj.updateButton(value.index, getDisplayKey(value.data, language, isShiftPressed));
   });
+};
+
+const switchCapsLock = (obj, button) => {
+  const capslock = ModifierStates.CAPSLOCK.toLowerCase();
+  obj.setStateValue(capslock, !obj.getStateValue(capslock));
+  button.classList.toggle(Css.BUTTON_ACTIVE);
 };
 
 const listenMouse = (obj) => {
   obj.addEventListener('click', (event) => {
     const { target } = event;
     if (target.closest(Html.BUTTON) && target.textContent === FunctionalKeys.CAPSLOCK) {
-      const key = 'capsLockClick';
-      obj.setStateValue(key, !obj.getStateValue(key));
-      target.classList.toggle(Css.BUTTON_ACTIVE);
+      switchCapsLock(obj, target);
     }
   });
 };
@@ -113,29 +116,43 @@ const listenMouse = (obj) => {
 const listenKeyboard = (obj) => {
   obj.addEventListener('keydown', (event) => {
     const key = obj.getKey(event.code);
-    if (key) {
-      obj.getButton(key.index).classList.add(Css.BUTTON_ACTIVE);
+    if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
+      return;
     }
-  });
-  obj.addEventListener('keyup', (event) => {
-    const key = obj.getKey(event.code);
-    if (key) {
-      obj.getButton(key.index).classList.remove(Css.BUTTON_ACTIVE);
-    }
-  });
-  obj.addEventListener('keydown', (event) => {
     obj.setStateValue('alt', event.getModifierState(ModifierStates.ALT));
-    obj.setStateValue('capsLock', event.getModifierState(ModifierStates.CAPSLOCK));
     obj.setStateValue('control', event.getModifierState(ModifierStates.CTRL));
     obj.setStateValue('shift', event.getModifierState(ModifierStates.SHIFT));
     obj.setStateValue('win', event.getModifierState(ModifierStates.WIN));
+
+    obj.getButton(key.index).classList.add(Css.BUTTON_ACTIVE);
+
+    if (obj.getStateValue('shift')) {
+      updateKeyboard(obj, true);
+      return;
+    }
+    if (obj.getStateValue('alt') && obj.getStateValue('control')) {
+      obj.updateLanguage();
+      updateKeyboard(obj, false);
+    }
+  });
+
+  obj.addEventListener('keyup', (event) => {
+    const key = obj.getKey(event.code);
+    if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
+      return;
+    }
+    obj.getButton(key.index).classList.remove(Css.BUTTON_ACTIVE);
+    if (obj.getStateValue('shift')) {
+      updateKeyboard(obj, false);
+    }
   });
 
   obj.addEventListener('keydown', (event) => {
-    if ((obj.getStateValue('shift') && event.code === FunctionalKeys.CONTROL_LEFT)
-      || (obj.getStateValue('control') && event.code === FunctionalKeys.SHIFT_LEFT)) {
-      updateKeyboard(obj);
+    const key = obj.getKey(event.code);
+    if (!key || key.data.code !== FunctionalKeys.CAPSLOCK) {
+      return;
     }
+    switchCapsLock(obj, obj.getButton(key.index));
   });
 };
 
@@ -153,6 +170,7 @@ const KeyboardUtils = {
   listenKeyboard,
   getButtonElements,
   Languages,
+  FunctionalKeys,
 };
 
 export default KeyboardUtils;

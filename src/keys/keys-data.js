@@ -238,7 +238,7 @@ const keys = [
   [
     {
       enKey: 'CapsLock',
-      enShiftKey: 'CapsLk',
+      enShiftKey: 'CapsLock',
       ruKey: 'CapsLock',
       ruShiftKey: 'CapsLock',
       code: 'CapsLock',

@@ -22,21 +22,22 @@ class Keyboard {
 
   #language;
 
+  static functionalKeys = KeyboardUtils.FunctionalKeys;
+
   /**
    * Creates a Keyboard component
    */
   constructor() {
+    this.#language = localStorage.getItem(StorageProperties.LANGUAGE)
+      || KeyboardUtils.Languages.ENG;
     this.#element = KeyboardUtils.createKeyboardElement(this.#language);
     this.#rows = this.#element.firstChild;
     this.#buttons = KeyboardUtils.getButtonElements(this.#rows);
     this.#keyObjects = new Map(keys.flat().map((x, i) => [x.code, { index: i, data: x }]));
 
-    this.#language = localStorage.getItem(StorageProperties.LANGUAGE)
-      || KeyboardUtils.Languages.ENG;
     this.#state = {
       shift: false,
-      capsLock: false,
-      capsLockClick: false,
+      capslock: false,
       control: false,
       win: false,
       alt: false,
@@ -65,7 +66,7 @@ class Keyboard {
   /**
    * Return object that represents key data
    * @param {string} code event.code of pressed key
-   * @returns {{index, keyData: {enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}}}
+   * @returns {{index, data: {enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}}}
    */
   getKey(code) {
     return this.#keyObjects.get(code);
@@ -99,7 +100,7 @@ class Keyboard {
   /**
    * Updates button's display text
    * @param {Number} index
-   * @param {{enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}} value
+   * @param {String} value
    */
   updateButton(index, value) {
     this.#buttons[index].textContent = value;

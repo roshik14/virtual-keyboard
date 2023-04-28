@@ -2,8 +2,6 @@ import Header from './header/header';
 import Main from './main/main';
 import Footer from './footer/footer';
 
-window.VirtualKeyboard = {};
-
 const Html = {
   BODY: 'body',
 };

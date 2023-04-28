@@ -14,13 +14,16 @@ const Css = {
   MAIN_BG: 'main-bg',
 };
 
-const namespace = window.VirtualKeyboard;
+const startListen = (keyboard, textarea) => {
+  const stateManager = new StateManager(keyboard, textarea);
+  stateManager.watch();
+};
 
 const getContent = () => {
   const wrapper = Wrapper();
   const textarea = TextArea();
   const keyboard = new Keyboard();
-  namespace.stateManager = new StateManager(keyboard, textarea);
+  startListen(keyboard, textarea);
   wrapper.append(textarea);
   wrapper.append(keyboard.getElement());
   return wrapper;

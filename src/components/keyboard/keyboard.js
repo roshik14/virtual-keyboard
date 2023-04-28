@@ -221,7 +221,10 @@ class Keyboard {
         return;
       }
       this.getButton(key.index).classList.remove(Css.BUTTON_ACTIVE);
-      this.#state.shift = false;
+      if (key.data.code === FunctionalKeys.SHIFT_LEFT
+          || key.data.code === FunctionalKeys.SHIFT_RIGHT) {
+        this.#state.shift = false;
+      }
       this.#updateKeyboard();
     });
   };

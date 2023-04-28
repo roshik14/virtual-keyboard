@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Element from '../element/element';
 import './textarea.scss';
 
@@ -5,19 +6,19 @@ const Css = {
   TEXTAREA: 'textarea',
 };
 
-const Options = {
+const Attributes = {
   rows: 10,
   autofocus: true,
 };
 
 const disableDefaultKeypress = (textarea) => {
-  textarea.addEventListener('keypress', (event) => {
+  textarea.addEventListener('keydown', (event) => {
     event.preventDefault();
   });
 };
 
 const TextArea = () => {
-  const textarea = Element('textarea', [Css.TEXTAREA], '', Options);
+  const textarea = Element('textarea', [Css.TEXTAREA], '', Attributes);
   disableDefaultKeypress(textarea);
   return textarea;
 };

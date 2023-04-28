@@ -10,7 +10,7 @@ const Html = {
 
 const App = () => {
   const body = document.querySelector(Html.BODY);
-  body.append(Header('Virtual keyboard'));
+  body.append(Header());
   body.append(Main());
   body.append(Footer());
 };

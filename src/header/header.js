@@ -12,9 +12,9 @@ const Css = {
   TITLE: 'header-title',
 };
 
-const Header = (title) => {
+const Header = () => {
   const wrapper = Wrapper();
-  wrapper.append(Element(Html.TITLE, [Css.TITLE], title));
+  wrapper.append(Element(Html.TITLE, [Css.TITLE], 'Virtual keyboard'));
   const header = Element(Html.HEADER, [Css.HEADER]);
   header.append(wrapper);
   return header;

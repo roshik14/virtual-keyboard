@@ -1,12 +1,6 @@
 /* eslint-disable no-console */
 import Keyboard from '../components/keyboard/keyboard';
 
-/**
- * Determines event.code is Arrow key or not
- * @param {String} code event.code of pressed key
- * @returns {Boolean}
- */
-
 const ArrowKey = {
   UP: 'ArrowUp',
   DOWN: 'ArrowDown',
@@ -14,17 +8,37 @@ const ArrowKey = {
   RIGHT: 'ArrowRight',
 };
 
+const Html = {
+  BUTTON: 'button',
+};
+
 const removeKeys = new Set([Keyboard.functionalKeys.BACKSPACE, Keyboard.functionalKeys.DELETE]);
 
 /**
+ * @param {Keyboard} keyboard
+ * @param {{}} currentKey
+ * @returns {String} Text value
+ */
+const getDisplayValue = (keyboard, text) => {
+  const isCapsOn = keyboard.getStateValue(keyboard.StateKeys.CAPSLOCK);
+  const isShiftOn = keyboard.getStateValue(keyboard.StateKeys.SHIFT);
+  if (isCapsOn) {
+    return isShiftOn ? text.toLowerCase() : text;
+  }
+  return isShiftOn ? text : text.toLowerCase();
+};
+
+/**
  * Add new key value to textarea value
- * @param {{}} key Object represents key data
+ * @param {Keyboard} keyboard
  * @param {String} text Textarea value
+ * @param {{}} key Object represents key data
  * @param {Number} pos Cursor position
  * @returns {String} new text value
  */
-const addNewTextValue = (key, text, pos) => {
-  const newValue = key.code === Keyboard.functionalKeys.ENTER ? '\n' : key.enKey;
+const getNewValue = (keyboard, text, buttonContent, pos) => {
+  const displayValue = getDisplayValue(keyboard, buttonContent);
+  const newValue = buttonContent === Keyboard.functionalKeys.ENTER ? '\n' : displayValue;
   return `${text.substring(0, pos)}${newValue}${text.substring(pos)}`;
 };
 
@@ -32,17 +46,20 @@ const addNewTextValue = (key, text, pos) => {
  * Removes previous or next character
  * @param {{}} key Object represents key data
  * @param {String} text Textarea value
- * @param {Number} pos Cursor position
+ * @param {Number} start Cursor start position
+ * @param {Number} end Cursor end position
  * @returns {String} new text value
  */
-const removeTextValue = (key, text, pos) => {
-  if (key.code === Keyboard.functionalKeys.BACKSPACE) {
-    return text.substring(0, pos - 1) + text.substring(pos);
+const removeTextValue = (key, text, start, end) => {
+  const positions = new Map([
+    [Keyboard.functionalKeys.BACKSPACE, [start - 1, start]],
+    [Keyboard.functionalKeys.DELETE, [start, start + 1]],
+  ]);
+  if (start === end) {
+    const [first, second] = positions.get(key.code);
+    return text.substring(0, first) + text.substring(second);
   }
-  if (key.code === Keyboard.functionalKeys.DELETE) {
-    return text.substring(0, pos) + text.substring(pos + 1);
-  }
-  return text;
+  return text.substring(0, start) + text.substring(end);
 };
 
 const moveCursorPosition = (key, pos) => {
@@ -71,38 +88,71 @@ class StateManager {
     this.#keyboard = keyboard;
     this.#textarea = textarea;
     this.#arrowKeys = new Set(Object.values(ArrowKey));
-    this.watch();
+    this.#watch();
   }
 
-  watch() {
+  #watch() {
+    this.#listenKeyboard();
+    this.#listenMouse();
+  }
+
+  #listenKeyboard = () => {
     this.#keyboard.addEventListener('keydown', (event) => {
-      const key = this.#keyboard.getKey(event.code)?.data ?? null;
-      if (key) {
-        this.#textarea.focus();
-        const cursorPos = this.#textarea.selectionStart;
-        if (key.isWritable) {
-          this.#textarea.value = addNewTextValue(key, this.#textarea.value, cursorPos);
-          this.updateCursorPosition(cursorPos + 1);
-        }
-        if (removeKeys.has(key.code)) {
-          this.#textarea.value = removeTextValue(key, this.#textarea.value, cursorPos);
-          const pos = key.code === Keyboard.functionalKeys.BACKSPACE && cursorPos
-            ? cursorPos - 1
-            : cursorPos;
-          this.updateCursorPosition(pos);
-        }
-        if (this.#arrowKeys.has(key.code)) {
-          const newPos = moveCursorPosition(key, cursorPos);
-          this.updateCursorPosition(newPos);
-        }
+      const key = this.#keyboard.getKey(event.code);
+      this.#updateTextArea(key);
+      event.preventDefault();
+    });
+  };
+
+  #listenMouse = () => {
+    this.#keyboard.addEventListener('click', (event) => {
+      const { target } = event;
+      if (target.closest(Html.BUTTON)) {
+        const key = this.#keyboard.getKeyByButton(target);
+        this.#updateTextArea(key);
       }
     });
-  }
+  };
 
-  updateCursorPosition(pos) {
+  #updateTextArea = (key) => {
+    if (!key) {
+      return;
+    }
+    this.#textarea.focus();
+    const startPos = this.#textarea.selectionStart;
+    if (key.data.isWritable) {
+      this.#add(key, startPos);
+      this.#updateCursorPosition(startPos + 1);
+    }
+    if (removeKeys.has(key.data.code)) {
+      const endPos = this.#textarea.selectionEnd;
+      const pos = this.#remove(key, startPos, endPos);
+      this.#updateCursorPosition(pos);
+    }
+    if (this.#arrowKeys.has(key.data.code)) {
+      const newPos = moveCursorPosition(key.data, startPos);
+      this.#updateCursorPosition(newPos);
+    }
+  };
+
+  #add = (key, cursorPosition) => {
+    const content = this.#keyboard.getButton(key.index).textContent;
+    const text = this.#textarea.value;
+    this.#textarea.value = getNewValue(this.#keyboard, text, content, cursorPosition);
+  };
+
+  #remove = (key, start, end) => {
+    this.#textarea.value = removeTextValue(key.data, this.#textarea.value, start, end);
+    const pos = key.data.code === Keyboard.functionalKeys.BACKSPACE && start === end
+      ? start - 1
+      : start;
+    return pos;
+  };
+
+  #updateCursorPosition = (pos) => {
     this.#textarea.selectionStart = pos;
     this.#textarea.selectionEnd = pos;
-  }
+  };
 }
 
 export default StateManager;

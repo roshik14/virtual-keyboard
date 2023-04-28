@@ -88,10 +88,9 @@ class StateManager {
     this.#keyboard = keyboard;
     this.#textarea = textarea;
     this.#arrowKeys = new Set(Object.values(ArrowKey));
-    this.#watch();
   }
 
-  #watch() {
+  watch() {
     this.#listenKeyboard();
     this.#listenMouse();
   }

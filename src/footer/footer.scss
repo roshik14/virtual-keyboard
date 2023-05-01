@@ -1,0 +1,22 @@
+@import '../css_modules/mixins.scss';
+@import '../css_modules/vars.scss';
+
+.footer {
+  padding: 10px 0;
+  @include background;
+}
+
+.footer-list {
+  display: flex;
+  justify-content: center;
+}
+
+.footer-link {
+  font-size: 24px;
+  color: $link-color;
+  transition: linear 0.2s;
+}
+
+.footer-link:hover {
+  color: $link-hover-color;
+}

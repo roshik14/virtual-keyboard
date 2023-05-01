@@ -1,0 +1,67 @@
+@import '../../css_modules/vars.scss';
+
+@mixin keyboard-row {
+  display: grid;
+  column-gap: 5px;
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.keyboard {
+  margin: 25px;
+  padding: 10px;
+  background-color: $keyboard-bg-color;
+}
+
+.keyboard-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard-row-0 {
+  @include keyboard-row;
+  grid-template-columns: repeat(14, 1fr);
+}
+
+.keyboard-row-1 {
+  @include keyboard-row;
+  grid-template-columns: repeat(15, 1fr);
+}
+
+.keyboard-row-2 {
+  @include keyboard-row;
+  grid-template-columns: repeat(12, 1fr) 15%;
+}
+
+.keyboard-row-3 {
+  @include keyboard-row;
+  grid-template-columns: 10% repeat(9, 1fr) 6% 1fr 16%;
+}
+
+.keyboard-row-4 {
+  @include keyboard-row;
+  grid-template-columns: repeat(3, 1fr) 39% repeat(3, 6%) repeat(2, 1fr);
+}
+
+
+.keyboard-button {
+  padding: 15px 25px;
+  font-size: 18px;
+  color: $key-color;
+  background-color: $key-bg-color;
+  border: 1px solid $key-border-color;
+  transition: 0.2s linear;
+  box-shadow: 0 2px 5px $key-shadow-color;
+}
+
+.keyboard-button__functional {
+  background-color: $key-functional-bg-color;
+}
+
+.keyboard-button:active,
+.keyboard-button__active {
+  background-color: $key-active-color;
+  color: $white-color;
+  box-shadow: 0 1px 5px $key-active-color;
+  transform: translateY(3px);
+}

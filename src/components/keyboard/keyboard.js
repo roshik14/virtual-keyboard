@@ -63,7 +63,19 @@ const createButton = (content, code) => {
   return Button({ content, classList });
 };
 
+const isShift = (key) => key === FunctionalKeys.SHIFT_LEFT || key === FunctionalKeys.SHIFT_RIGHT;
+
 const isLetter = (str) => (str >= 'a' && str <= 'z') || (str >= 'а' && str <= 'я');
+
+const isSwitchKey = (key) => {
+  const switchKeys = new Set([
+    FunctionalKeys.ALT_LEFT,
+    FunctionalKeys.ALT_RIGHT,
+    FunctionalKeys.CONTROL_LEFT,
+    FunctionalKeys.CONTROL_RIGHT,
+  ]);
+  return switchKeys.has(key);
+};
 
 /** Class representing keyboard component. */
 class Keyboard {
@@ -72,6 +84,8 @@ class Keyboard {
   #buttons;
 
   #element;
+
+  #buttonsWithKeys;
 
   #state = {
     shift: false,
@@ -84,8 +98,6 @@ class Keyboard {
   #language = localStorage.getItem(StorageProperties.LANGUAGE) || Languages.ENG;
 
   #keyObjects = new Map(keys.flat().map((x, i) => [x.code, { index: i, data: x }]));
-
-  #buttonsWithKeys;
 
   static functionalKeys = FunctionalKeys;
 
@@ -171,11 +183,33 @@ class Keyboard {
   #listenMouse = () => {
     this.addEventListener('click', (event) => {
       const { target } = event;
-      if (target.closest(Html.BUTTON) && target.textContent === FunctionalKeys.CAPSLOCK) {
-        this.#switchCapsLock(target);
+      const key = this.#getKeyOnClick(target);
+      if (!key) {
+        return;
+      }
+      if (key.data.code === FunctionalKeys.CAPSLOCK) {
+        this.#switchButtonState(target, this.StateKeys.CAPSLOCK);
+        this.#updateKeyboard();
+      }
+      if (isShift(key.data.code)) {
+        this.#switchButtonState(target, this.StateKeys.SHIFT);
+        this.#updateKeyboard();
       }
     });
   };
+
+  #shiftClickHandler = (event) => {
+    const key = this.#getKeyOnClick(event.target);
+    if (!key) {
+      return;
+    }
+    if (isShift(key.data.code)) {
+      this.#state.shift = !this.#state.shift;
+      this.#updateKeyboard();
+    }
+  };
+
+  #getKeyOnClick = (target) => (target.closest(Html.BUTTON) ? this.getKeyByButton(target) : null);
 
   #listenKeyboard = () => {
     this.#listenKeyDown();
@@ -188,20 +222,30 @@ class Keyboard {
       if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
         return;
       }
+
       this.#state.alt = event.getModifierState(ModifierStates.ALT);
       this.#state.control = event.getModifierState(ModifierStates.CTRL);
-      this.#state.shift = event.getModifierState(ModifierStates.SHIFT);
       this.#state.win = event.getModifierState(ModifierStates.WIN);
 
       this.getButton(key.index).classList.add(Css.BUTTON_ACTIVE);
+
+      if (this.#state.alt && this.#state.control
+        && !isSwitchKey(key.data.code) && !isShift(key)) {
+        return;
+      }
+
+      if (isShift(key.data.code)) {
+        this.#state.shift = true;
+      }
 
       if (this.#state.shift) {
         this.#updateKeyboard();
         return;
       }
+
       if (this.#state.alt && this.#state.control) {
         this.#updateLanguage();
-        this.#updateKeyboard(false);
+        this.#updateKeyboard();
       }
     });
 
@@ -210,7 +254,8 @@ class Keyboard {
       if (!key || key.data.code !== FunctionalKeys.CAPSLOCK) {
         return;
       }
-      this.#switchCapsLock();
+      this.#switchButtonState(this.getButton(key.index), this.StateKeys.CAPSLOCK);
+      this.#updateKeyboard();
     });
   };
 
@@ -220,9 +265,9 @@ class Keyboard {
       if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
         return;
       }
+
       this.getButton(key.index).classList.remove(Css.BUTTON_ACTIVE);
-      if (key.data.code === FunctionalKeys.SHIFT_LEFT
-          || key.data.code === FunctionalKeys.SHIFT_RIGHT) {
+      if (isShift(key.data.code)) {
         this.#state.shift = false;
       }
       this.#updateKeyboard();
@@ -238,7 +283,13 @@ class Keyboard {
     const current = this.#language === Languages.ENG
       ? { key: key.enKey, shiftKey: key.enShiftKey }
       : { key: key.ruKey, shiftKey: key.ruShiftKey };
-    return isLetter(current.key) || this.#state.shift ? current.shiftKey : current.key;
+    if (!this.#state.capslock) {
+      return this.#state.shift ? current.shiftKey : current.key;
+    }
+    if (this.#state.shift) {
+      return isLetter(current.key) ? current.key : current.shiftKey;
+    }
+    return isLetter(current.key) ? current.shiftKey : current.key;
   };
 
   #createKeyboardElement = () => {
@@ -268,8 +319,8 @@ class Keyboard {
     });
   };
 
-  #switchCapsLock = (button) => {
-    this.#state.capslock = !this.#state.capslock;
+  #switchButtonState = (button, key) => {
+    this.#state[key] = !this.#state[key];
     button.classList.toggle(Css.BUTTON_ACTIVE);
   };
 

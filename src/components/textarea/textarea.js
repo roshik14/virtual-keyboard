@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import Element from '../element/element';
 import './textarea.scss';
 
@@ -9,6 +8,7 @@ const Css = {
 const Attributes = {
   rows: 10,
   autofocus: true,
+  wrap: 'soft',
 };
 
 const disableDefaultKeypress = (textarea) => {

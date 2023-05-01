@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import Element from '../element/element';
 import Button from '../button/button';
 import keys from '../../keys/keys-data';
@@ -86,6 +85,10 @@ class Keyboard {
   #element;
 
   #buttonsWithKeys;
+
+  #isLeftShiftPressed;
+
+  #isRightShiftPressed;
 
   #state = {
     shift: false,
@@ -194,10 +197,12 @@ class Keyboard {
       if (isShift(key.data.code)) {
         this.#switchButtonState(target, this.StateKeys.SHIFT);
         this.#updateKeyboard();
-        const anotherShift = target.nextSibling
-          ? target.parentNode.lastChild
-          : target.parentNode.firstChild;
-        anotherShift.disabled = this.#state.shift;
+        this.#updateAnotherShiftBtn(target);
+        if (target.nextSibling) {
+          this.#isLeftShiftPressed = this.#state.shift;
+        } else {
+          this.#isRightShiftPressed = this.#state.shift;
+        }
       }
     });
   };
@@ -211,37 +216,54 @@ class Keyboard {
 
   #listenKeyDown = () => {
     this.addEventListener('keydown', (event) => {
+      event.preventDefault();
       const key = this.getKey(event.code);
       if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
         return;
       }
 
-      this.#state.alt = event.getModifierState(ModifierStates.ALT);
-      this.#state.control = event.getModifierState(ModifierStates.CTRL);
+      if (isShift(key.data.code) && this.#state.shift) {
+        return;
+      }
+
       this.#state.win = event.getModifierState(ModifierStates.WIN);
 
       this.getButton(key.index).classList.add(Css.BUTTON_ACTIVE);
 
-      if (this.#state.alt && this.#state.control
-        && !isSwitchKey(key.data.code) && !isShift(key)) {
-        return;
-      }
-
       if (isShift(key.data.code)) {
         this.#state.shift = true;
-      }
-
-      if (this.#state.shift) {
+        const button = this.getButton(key.index);
+        this.#updateAnotherShiftBtn(button);
+        if (button.nextSibling) {
+          this.#isLeftShiftPressed = this.#state.shift;
+        } else {
+          this.#isRightShiftPressed = this.#state.shift;
+        }
         this.#updateKeyboard();
+      }
+    });
+    this.#addListenerForCapslock();
+    this.#addListenerForSwitchLanguage();
+  };
+
+  #addListenerForSwitchLanguage = () => {
+    this.addEventListener('keydown', (event) => {
+      const key = this.getKey(event.code);
+      if (!key || !isSwitchKey(key.data.code)) {
         return;
       }
+
+      this.#state.alt = event.getModifierState(ModifierStates.ALT);
+      this.#state.control = event.getModifierState(ModifierStates.CTRL);
 
       if (this.#state.alt && this.#state.control) {
         this.#updateLanguage();
         this.#updateKeyboard();
       }
     });
+  };
 
+  #addListenerForCapslock = () => {
     this.addEventListener('keydown', (event) => {
       const key = this.getKey(event.code);
       if (!key || key.data.code !== FunctionalKeys.CAPSLOCK) {
@@ -258,13 +280,34 @@ class Keyboard {
       if (!key || key.data.code === FunctionalKeys.CAPSLOCK) {
         return;
       }
+      if (this.#isLeftShiftPressed && key.data.code === FunctionalKeys.SHIFT_LEFT) {
+        this.#isLeftShiftPressed = false;
+      }
+
+      if (this.#isRightShiftPressed && key.data.code === FunctionalKeys.SHIFT_RIGHT) {
+        this.#isRightShiftPressed = false;
+      }
+
+      if ((this.#isLeftShiftPressed && key.data.code === FunctionalKeys.SHIFT_RIGHT)
+          || (this.#isRightShiftPressed && key.data.code === FunctionalKeys.SHIFT_LEFT)) {
+        return;
+      }
 
       this.getButton(key.index).classList.remove(Css.BUTTON_ACTIVE);
       if (isShift(key.data.code)) {
         this.#state.shift = false;
+        const button = this.getButton(key.index);
+        this.#updateAnotherShiftBtn(button);
       }
       this.#updateKeyboard();
     });
+  };
+
+  #updateAnotherShiftBtn = (currentShiftBtn) => {
+    const anotherShift = currentShiftBtn.nextSibling
+      ? currentShiftBtn.parentNode.lastChild
+      : currentShiftBtn.parentNode.firstChild;
+    anotherShift.disabled = this.#state.shift;
   };
 
   #updateLanguage = () => {

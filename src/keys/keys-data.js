@@ -263,7 +263,7 @@ const keys = [
     {
       enKey: 'd',
       enShiftKey: 'D',
-      ruKey: 'В',
+      ruKey: 'в',
       ruShiftKey: 'В',
       code: 'KeyD',
       isWritable: true,
@@ -428,7 +428,7 @@ const keys = [
       ruKey: '↑',
       ruShiftKey: '↑',
       code: 'ArrowUp',
-      isWritable: false,
+      isWritable: true,
     },
     {
       enKey: '/',
@@ -486,7 +486,7 @@ const keys = [
       ruKey: '←',
       ruShiftKey: '←',
       code: 'ArrowLeft',
-      isWritable: false,
+      isWritable: true,
     },
     {
       enKey: '↓',
@@ -494,7 +494,7 @@ const keys = [
       ruKey: '↓',
       ruShiftKey: '↓',
       code: 'ArrowDown',
-      isWritable: false,
+      isWritable: true,
     },
     {
       enKey: '→',
@@ -502,7 +502,7 @@ const keys = [
       ruKey: '→',
       ruShiftKey: '→',
       code: 'ArrowRight',
-      isWritable: false,
+      isWritable: true,
     },
     {
       enKey: 'Alt',

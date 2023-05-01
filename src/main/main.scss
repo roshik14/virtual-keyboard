@@ -2,7 +2,12 @@
 @import '../css_modules/normalize.scss';
 
 .main {
-  padding: 50px 0 50px;
+  padding: 50px 0 0;
+}
+
+.description {
+  font-size: 24px;
+  color: $title-color;
 }
 
 .main-bg {

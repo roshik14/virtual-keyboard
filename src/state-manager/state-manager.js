@@ -1,13 +1,6 @@
 /* eslint-disable no-console */
 import Keyboard from '../components/keyboard/keyboard';
 
-const ArrowKey = {
-  UP: 'ArrowUp',
-  DOWN: 'ArrowDown',
-  LEFT: 'ArrowLeft',
-  RIGHT: 'ArrowRight',
-};
-
 const Html = {
   BUTTON: 'button',
 };
@@ -62,22 +55,10 @@ const removeTextValue = (key, text, start, end) => {
   return text.substring(0, start) + text.substring(end);
 };
 
-const moveCursorPosition = (key, pos) => {
-  if (key.code === ArrowKey.RIGHT) {
-    return pos + 1;
-  }
-  if (key.code === ArrowKey.LEFT) {
-    return !pos ? pos : pos - 1;
-  }
-  return pos;
-};
-
 class StateManager {
   #keyboard;
 
   #textarea;
-
-  #arrowKeys;
 
   /**
    * Construct StateManager that controls keyboard to manipulate textarea
@@ -87,7 +68,6 @@ class StateManager {
   constructor(keyboard, textarea) {
     this.#keyboard = keyboard;
     this.#textarea = textarea;
-    this.#arrowKeys = new Set(Object.values(ArrowKey));
   }
 
   watch() {
@@ -97,9 +77,9 @@ class StateManager {
 
   #listenKeyboard = () => {
     this.#keyboard.addEventListener('keydown', (event) => {
+      event.preventDefault();
       const key = this.#keyboard.getKey(event.code);
       this.#updateTextArea(key);
-      event.preventDefault();
     });
   };
 
@@ -119,23 +99,19 @@ class StateManager {
     }
     this.#textarea.focus();
     const startPos = this.#textarea.selectionStart;
+    const endPos = this.#textarea.selectionEnd;
     if (key.data.isWritable) {
-      this.#add(key, startPos);
+      this.#add(key.index, startPos);
       this.#updateCursorPosition(startPos + 1);
     }
     if (removeKeys.has(key.data.code)) {
-      const endPos = this.#textarea.selectionEnd;
       const pos = this.#remove(key, startPos, endPos);
       this.#updateCursorPosition(pos);
     }
-    if (this.#arrowKeys.has(key.data.code)) {
-      const newPos = moveCursorPosition(key.data, startPos);
-      this.#updateCursorPosition(newPos);
-    }
   };
 
-  #add = (key, cursorPosition) => {
-    const content = this.#keyboard.getButton(key.index).textContent;
+  #add = (index, cursorPosition) => {
+    const content = this.#keyboard.getButton(index).textContent;
     const text = this.#textarea.value;
     this.#textarea.value = getNewValue(this.#keyboard, text, content, cursorPosition);
   };

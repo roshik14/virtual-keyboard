@@ -65,7 +65,7 @@ const createButton = (content, code) => {
 
 const isShift = (key) => key === FunctionalKeys.SHIFT_LEFT || key === FunctionalKeys.SHIFT_RIGHT;
 
-const isLetter = (str) => (str >= 'a' && str <= 'z') || (str >= 'а' && str <= 'я');
+const isLetter = (str) => (str >= 'a' && str <= 'z') || (str >= 'а' && str <= 'я') || str === 'ё';
 
 const isSwitchKey = (key) => {
   const switchKeys = new Set([
@@ -144,7 +144,7 @@ class Keyboard {
   /**
    * Returns key by pased HTMLButtonElement
    * @param {HTMLButtonElement} button
-   * @returns {{enKey, enShiftKey, ruKey, ruShiftKey, code, isWritable}}
+   * @returns {{index, data: {enKey, ruKey, enShiftKey, ruShiftKey, code, isWritable}}}
    */
   getKeyByButton = (button) => this.#buttonsWithKeys.get(button);
 
@@ -194,19 +194,12 @@ class Keyboard {
       if (isShift(key.data.code)) {
         this.#switchButtonState(target, this.StateKeys.SHIFT);
         this.#updateKeyboard();
+        const anotherShift = target.nextSibling
+          ? target.parentNode.lastChild
+          : target.parentNode.firstChild;
+        anotherShift.disabled = this.#state.shift;
       }
     });
-  };
-
-  #shiftClickHandler = (event) => {
-    const key = this.#getKeyOnClick(event.target);
-    if (!key) {
-      return;
-    }
-    if (isShift(key.data.code)) {
-      this.#state.shift = !this.#state.shift;
-      this.#updateKeyboard();
-    }
   };
 
   #getKeyOnClick = (target) => (target.closest(Html.BUTTON) ? this.getKeyByButton(target) : null);

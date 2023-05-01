@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import Keyboard from '../components/keyboard/keyboard';
 
 const Html = {
@@ -31,7 +30,13 @@ const getDisplayValue = (keyboard, text) => {
  */
 const getNewValue = (keyboard, text, buttonContent, pos) => {
   const displayValue = getDisplayValue(keyboard, buttonContent);
-  const newValue = buttonContent === Keyboard.functionalKeys.ENTER ? '\n' : displayValue;
+  let newValue = displayValue;
+  if (buttonContent === Keyboard.functionalKeys.ENTER) {
+    newValue = '\n';
+  }
+  if (buttonContent === Keyboard.functionalKeys.TAB) {
+    newValue = '\t';
+  }
   return `${text.substring(0, pos)}${newValue}${text.substring(pos)}`;
 };
 
@@ -77,7 +82,6 @@ class StateManager {
 
   #listenKeyboard = () => {
     this.#keyboard.addEventListener('keydown', (event) => {
-      event.preventDefault();
       const key = this.#keyboard.getKey(event.code);
       this.#updateTextArea(key);
     });
@@ -118,9 +122,11 @@ class StateManager {
 
   #remove = (key, start, end) => {
     this.#textarea.value = removeTextValue(key.data, this.#textarea.value, start, end);
-    const pos = key.data.code === Keyboard.functionalKeys.BACKSPACE && start === end
-      ? start - 1
-      : start;
+    const isBackspace = key.data.code === Keyboard.functionalKeys.BACKSPACE;
+    if (isBackspace && !start) {
+      return start;
+    }
+    const pos = isBackspace && start === end ? start - 1 : start;
     return pos;
   };
 

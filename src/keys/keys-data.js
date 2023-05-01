@@ -120,7 +120,7 @@ const keys = [
       ruKey: 'Tab',
       ruShiftKey: 'Tab',
       code: 'Tab',
-      isWritable: false,
+      isWritable: true,
     },
     {
       enKey: 'q',
